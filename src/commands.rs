@@ -128,14 +128,17 @@ pub fn handle_remove_command(version_num: &str, cmd: &mut Command) {
 }
 
 pub fn handle_list_command(cmd: &mut Command) {
-    // TODO: better error message
     let Ok(installed_versions) = get_installed_versions() else {
-        cmd.error(ErrorKind::Io, "Failed to get installed versions from path")
+        cmd.error(ErrorKind::Io, "Failed to get installed versions")
             .exit()
     };
 
-    println!("All installed versions");
-    for version in &installed_versions {
-        println!("Node v{}", version);
+    if installed_versions.is_empty() {
+        println!("No installed versions")
+    } else {
+        println!("{} installed versions", installed_versions.len());
+        for version in &installed_versions {
+            println!("Node v{}", version);
+        }
     }
 }
