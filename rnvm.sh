@@ -22,3 +22,12 @@ rnvm() {
     command rnvm "$sub_command" "$@"
   fi
 }
+
+# Run on startup to source path
+start_output=$(command rnvm start)
+cmd_status=$?
+if [ $cmd_status -ne 0 ]; then
+  echo "$start_output" >&2
+else
+  eval "$start_output"
+fi
