@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use std::{env, fs, path::Path};
 
 use clap::{CommandFactory, Parser, error::ErrorKind};
@@ -55,20 +57,20 @@ fn main() {
     {
         cmd.error(
             ErrorKind::Io,
-            format!("Failed to create directory {path:?}"),
+            format!("Failed to create directory {}", path.display()),
         )
         .exit()
     } else if !path.is_dir() {
         cmd.error(
             ErrorKind::Io,
-            format!("{path:?} exists but is not a directory"),
+            format!("{} exists but is not a directory", path.display()),
         )
         .exit()
     }
 
     match &args.command {
         Some(Commands::Install { version_num }) => {
-            handle_install_command(version_num, install_client, &mut cmd);
+            handle_install_command(version_num, &*install_client, &mut cmd);
         }
         Some(Commands::Current) => {
             handle_current_command(&mut cmd);

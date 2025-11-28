@@ -68,7 +68,7 @@ pub struct MacSiliconClient {}
 // TODO: impl mac install
 impl InstallStrategy for MacSiliconClient {
     fn install(&self, _version_num: &str) -> Result<(), Error> {
-        println!("Doing the linux install");
+        println!("Mac install not yet implemented");
         Ok(())
     }
 }

@@ -36,11 +36,11 @@ pub enum Commands {
 
 pub fn handle_install_command(
     version_num: &str,
-    install_client: Box<dyn InstallStrategy>,
+    install_client: &dyn InstallStrategy,
     cmd: &mut Command,
 ) {
     println!("Installing Node v{version_num}");
-    let Ok(_) = install_client.install(version_num).map_err(|_| {
+    let Ok(()) = install_client.install(version_num).map_err(|_| {
         cmd.error(
             ErrorKind::ValueValidation,
             format!("Node v{version_num} does not exist"),
@@ -60,7 +60,7 @@ pub fn handle_current_command(cmd: &mut Command) {
             .exit()
     }
 
-    println!("Using Node v{active_version}")
+    println!("Using Node v{active_version}");
 }
 
 pub fn handle_use_command(version_num: &str, cmd: &mut Command) {
@@ -77,7 +77,7 @@ pub fn handle_use_command(version_num: &str, cmd: &mut Command) {
         .exit()
     }
 
-    let Ok(_) = update_path(version_num) else {
+    let Ok(()) = update_path(version_num) else {
         cmd.error(ErrorKind::ValueValidation, "Failed to update $PATH")
             .exit()
     };
@@ -137,11 +137,11 @@ pub fn handle_list_command(cmd: &mut Command) {
     };
 
     if installed_versions.is_empty() {
-        println!("No installed versions")
+        println!("No installed versions");
     } else {
         println!("{} installed versions", installed_versions.len());
         for version in &installed_versions {
-            println!("Node v{}", version);
+            println!("Node v{version}");
         }
     }
 }
@@ -152,7 +152,7 @@ pub fn handle_start_command(cmd: &mut Command) {
             .exit()
     };
 
-    let Ok(_) = update_path(&active_version) else {
+    let Ok(()) = update_path(&active_version) else {
         cmd.error(ErrorKind::ValueValidation, "Failed to update $PATH")
             .exit()
     };
