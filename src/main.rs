@@ -2,11 +2,15 @@ use std::{env, fs, path::Path};
 
 use clap::{CommandFactory, Parser, error::ErrorKind};
 
-use crate::commands::{
-    Commands, handle_current_command, handle_install_command, handle_list_command,
-    handle_remove_command, handle_use_command,
+use crate::{
+    client::{InstallStrategy, LinuxClient, MacSiliconClient},
+    commands::{
+        Commands, handle_current_command, handle_install_command, handle_list_command,
+        handle_remove_command, handle_use_command,
+    },
 };
 
+mod client;
 mod commands;
 mod file;
 
@@ -21,6 +25,23 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let mut cmd = Args::command();
+
+    let install_client: Box<dyn InstallStrategy> =
+        if cfg!(target_os = "linux") && cfg!(target_arch = "x86_64") {
+            Box::new(LinuxClient {})
+        } else if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
+            Box::new(MacSiliconClient {})
+        } else {
+            cmd.error(
+                ErrorKind::Io,
+                format!(
+                    "{} architecture on {} is not supported",
+                    std::env::consts::ARCH,
+                    std::env::consts::OS
+                ),
+            )
+            .exit()
+        };
 
     // Ensure working directory exists, create if needed
     // TODO: add better instructions to error message
@@ -48,7 +69,7 @@ fn main() {
 
     match &args.command {
         Some(Commands::Install { version_num }) => {
-            handle_install_command(version_num, &mut cmd);
+            handle_install_command(version_num, install_client, &mut cmd);
         }
         Some(Commands::Current) => {
             handle_current_command(&mut cmd);

@@ -1,8 +1,11 @@
 use clap::{Command, Subcommand, error::ErrorKind};
 
-use crate::file::{
-    does_installed_version_exist, get_active_version_from_metadata, get_installed_versions,
-    remove_installed_version, set_active_version_in_metadata,
+use crate::{
+    client::InstallStrategy,
+    file::{
+        does_installed_version_exist, get_active_version_from_metadata, get_installed_versions,
+        remove_installed_version, set_active_version_in_metadata,
+    },
 };
 
 #[derive(Subcommand)]
@@ -28,20 +31,20 @@ pub enum Commands {
     List,
 }
 
-// TODO: finish
-pub fn handle_install_command(version_num: &str, cmd: &mut Command) {
-    // TODO: throw this same error if the version does not exist
-    // Add instructions to fix
-    if version_num == "123" {
+pub fn handle_install_command(
+    version_num: &str,
+    install_client: Box<dyn InstallStrategy>,
+    cmd: &mut Command,
+) {
+    println!("Installing Node v{version_num}");
+    let Ok(_) = install_client.install(version_num).map_err(|_| {
         cmd.error(
             ErrorKind::ValueValidation,
-            format!("Version {version_num} does not exist"),
+            format!("Node v{version_num} does not exist"),
         )
         .exit()
-    }
-
-    // TODO: do installing stuff here
-    println!("Installing {version_num}");
+    });
+    println!("Successfully installed Node v{version_num}");
 }
 
 pub fn handle_current_command(cmd: &mut Command) {
@@ -96,7 +99,7 @@ pub fn handle_remove_command(version_num: &str, cmd: &mut Command) {
     if active_version == version_num {
         cmd.error(
             ErrorKind::ValueValidation,
-            "Cannot remove version that is currently used",
+            "Cannot remove the version that is currently used",
         )
         .exit()
     }
@@ -124,7 +127,7 @@ pub fn handle_remove_command(version_num: &str, cmd: &mut Command) {
             .exit()
         })
         .unwrap();
-    println!("Removed Node v{version_num}");
+    println!("Successfully removed Node v{version_num}!");
 }
 
 pub fn handle_list_command(cmd: &mut Command) {
