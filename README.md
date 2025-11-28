@@ -1,3 +1,5 @@
+[![Cargo Build & Test](https://github.com/jakewaldrip/rnvm/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jakewaldrip/rnvm/actions/workflows/ci.yml)
+
 # RNVM - Rust Node Version Manager
 
 A blazingly fast Node.js version manager written in Rust.
