@@ -71,7 +71,7 @@ pub fn update_path(version_num: &str) -> Result<(), JoinPathsError> {
     let rnvm_dir = env::var("RNVM_DIR").expect("RNVM_DIR is not set");
 
     let mut paths: Vec<PathBuf> = env::split_paths(&path)
-        .filter(|p| !p.to_string_lossy().contains(&rnvm_dir.to_string()))
+        .filter(|p| !p.to_string_lossy().contains(&rnvm_dir.clone()))
         .collect();
 
     let rnvm_version_path = Path::new(&rnvm_dir).join(version_num).join("bin");
