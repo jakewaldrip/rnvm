@@ -13,7 +13,7 @@ A blazingly fast Node.js version manager written in Rust.
 ## Supported Platforms
 
 - Linux (x86_64)
-- macOS (Apple Silicon) - Coming soon
+- macOS (Apple Silicon)
 
 ## Installation
 
