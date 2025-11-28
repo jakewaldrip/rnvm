@@ -90,3 +90,20 @@ fn main() {
         None => {}
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::process::Command;
+    #[test]
+    #[ignore = "integration test"]
+    fn test_install_command() {
+        let output = Command::new("cargo")
+            .args(["run", "--", "install", "18.17.0"])
+            .output()
+            .expect("Failed to run command");
+
+        // Check exit status or output
+        assert!(output.status.success());
+        assert!(String::from_utf8_lossy(&output.stdout).contains("Successfully installed"));
+    }
+}

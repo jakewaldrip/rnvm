@@ -81,3 +81,34 @@ pub fn update_path(version_num: &str) -> Result<(), JoinPathsError> {
     println!("export PATH=\"{}\"", new_path.display());
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env;
+    use std::fs;
+
+    #[test]
+    fn test_get_active_version_from_metadata() {
+        // Set up temp dir
+        let temp_dir = env::temp_dir().join("rnvm_test");
+        fs::create_dir_all(&temp_dir).unwrap();
+        unsafe {
+            env::set_var("RNVM_DIR", temp_dir.to_str().unwrap());
+        }
+
+        let result = get_active_version_from_metadata().unwrap();
+        assert_eq!(result, "");
+
+        // Write and test
+        fs::write(temp_dir.join("metadata"), "v18.17.0").unwrap();
+        let result = get_active_version_from_metadata().unwrap();
+        assert_eq!(result, "v18.17.0");
+
+        // Cleanup
+        fs::remove_dir_all(&temp_dir).unwrap();
+        unsafe {
+            env::remove_var("RNVM_DIR");
+        }
+    }
+}
