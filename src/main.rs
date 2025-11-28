@@ -6,7 +6,7 @@ use crate::{
     client::{InstallStrategy, LinuxClient, MacSiliconClient},
     commands::{
         Commands, handle_current_command, handle_install_command, handle_list_command,
-        handle_remove_command, handle_use_command,
+        handle_remove_command, handle_start_command, handle_use_command,
     },
 };
 
@@ -44,7 +44,6 @@ fn main() {
         };
 
     // Ensure working directory exists, create if needed
-    // TODO: add better instructions to error message
     let Ok(rnvm_dir) = env::var("RNVM_DIR") else {
         cmd.error(ErrorKind::InvalidValue, "RNVM_DIR not found")
             .exit()
@@ -82,6 +81,9 @@ fn main() {
         }
         Some(Commands::List) => {
             handle_list_command(&mut cmd);
+        }
+        Some(Commands::Start) => {
+            handle_start_command(&mut cmd);
         }
         None => {}
     }

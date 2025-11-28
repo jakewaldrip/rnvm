@@ -42,10 +42,22 @@ impl InstallStrategy for LinuxClient {
             Err(e) => return Err(e),
         };
 
-        fs::create_dir_all(&out_dir)?;
+        let tmp_dir = out_dir.with_extension("tmp");
+        fs::create_dir_all(&tmp_dir)?;
+
         let decompressor = XzDecoder::new(&mut reader);
         let mut archive = Archive::new(decompressor);
-        archive.unpack(&out_dir)?;
+        archive.unpack(&tmp_dir)?;
+
+        // Move the unzipped file into the output directory
+        let mut entries = fs::read_dir(&tmp_dir)?
+            .filter_map(Result::ok)
+            .filter(|e| e.file_type().map(|ft| ft.is_dir()).unwrap_or(false));
+
+        if let Some(first_dir) = entries.next() {
+            fs::rename(first_dir.path(), &out_dir)?;
+        }
+        fs::remove_dir_all(&tmp_dir)?;
 
         Ok(())
     }

@@ -1,7 +1,9 @@
 use std::env;
+use std::env::JoinPathsError;
 use std::fs;
 use std::io::Error;
 use std::path::Path;
+use std::path::PathBuf;
 
 pub fn get_active_version_from_metadata() -> Result<String, Error> {
     let rnvm_dir = env::var("RNVM_DIR")
@@ -59,5 +61,23 @@ pub fn remove_installed_version(version_number: &str) -> Result<(), Error> {
     let version_path = Path::new(&rnvm_dir).join(version_number);
 
     fs::remove_dir_all(version_path)?;
+    Ok(())
+}
+
+/// Create a path that removes all existing rnvm node versions and prepend ours
+/// Prints to stdout so we can pipe it into an eval in the shell
+pub fn update_path(version_num: &str) -> Result<(), JoinPathsError> {
+    let path = env::var("PATH").expect("PATH is not set");
+    let rnvm_dir = env::var("RNVM_DIR").expect("RNVM_DIR is not set");
+
+    let mut paths: Vec<PathBuf> = env::split_paths(&path)
+        .filter(|p| !p.to_string_lossy().contains(&rnvm_dir.to_string()))
+        .collect();
+
+    let rnvm_version_path = Path::new(&rnvm_dir).join(version_num).join("bin");
+    paths.insert(0, rnvm_version_path);
+
+    let new_path = env::join_paths(paths)?;
+    println!("export PATH=\"{}\"", new_path.display());
     Ok(())
 }

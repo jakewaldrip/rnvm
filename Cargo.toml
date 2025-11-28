@@ -2,6 +2,13 @@
 name = "rnvm"
 version = "0.1.0"
 edition = "2024"
+authors = ["jakeywaldrip@gmail.com>"]
+description = "Blazingly fast Node version manager"
+license = "MIT"
+repository = "https://github.com/jakewaldrip/rnvm"
+readme = "README.md"
+keywords = ["nvm", "cli", "node"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.5.53", features = ["derive"] }

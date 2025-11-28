@@ -4,7 +4,7 @@ use crate::{
     client::InstallStrategy,
     file::{
         does_installed_version_exist, get_active_version_from_metadata, get_installed_versions,
-        remove_installed_version, set_active_version_in_metadata,
+        remove_installed_version, set_active_version_in_metadata, update_path,
     },
 };
 
@@ -29,6 +29,9 @@ pub enum Commands {
     },
     /// List all installed versions
     List,
+    /// Set the path on shell start
+    #[command(hide = true)]
+    Start,
 }
 
 pub fn handle_install_command(
@@ -52,7 +55,6 @@ pub fn handle_current_command(cmd: &mut Command) {
         cmd.error(ErrorKind::Io, "Failed to read metadata").exit()
     };
 
-    // TODO: better instructions
     if active_version.is_empty() {
         cmd.error(ErrorKind::ValueValidation, "No active version set")
             .exit()
@@ -61,15 +63,12 @@ pub fn handle_current_command(cmd: &mut Command) {
     println!("Using Node v{active_version}")
 }
 
-// TODO: finish
 pub fn handle_use_command(version_num: &str, cmd: &mut Command) {
-    // TODO: Add instructions to fix
     let Ok(does_version_exist) = does_installed_version_exist(version_num) else {
         cmd.error(ErrorKind::Io, "Failed to read rnvm directory")
             .exit()
     };
 
-    // TODO: better instructions
     if !does_version_exist {
         cmd.error(
             ErrorKind::ValueValidation,
@@ -78,16 +77,17 @@ pub fn handle_use_command(version_num: &str, cmd: &mut Command) {
         .exit()
     }
 
-    // BIG TODO: adjust path to actually use the associated version
+    let Ok(_) = update_path(version_num) else {
+        cmd.error(ErrorKind::ValueValidation, "Failed to update $PATH")
+            .exit()
+    };
 
-    println!("Switching to Node v{version_num}");
     set_active_version_in_metadata(version_num)
         .map_err(|_| {
             cmd.error(ErrorKind::Io, "Failed to write to .rnvm directory")
                 .exit()
         })
         .unwrap();
-    println!("Now using Node v{version_num}")
 }
 
 pub fn handle_remove_command(version_num: &str, cmd: &mut Command) {
@@ -144,4 +144,16 @@ pub fn handle_list_command(cmd: &mut Command) {
             println!("Node v{}", version);
         }
     }
+}
+
+pub fn handle_start_command(cmd: &mut Command) {
+    let Ok(active_version) = get_active_version_from_metadata() else {
+        cmd.error(ErrorKind::Io, "Failed to read active version")
+            .exit()
+    };
+
+    let Ok(_) = update_path(&active_version) else {
+        cmd.error(ErrorKind::ValueValidation, "Failed to update $PATH")
+            .exit()
+    };
 }
